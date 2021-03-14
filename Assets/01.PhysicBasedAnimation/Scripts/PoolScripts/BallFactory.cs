@@ -6,6 +6,8 @@ public class BallFactory : MonoBehaviour,
     IFactory<BallActivationInfo, BallPoolObject>
 {
     [SerializeField] private BallPoolObject _referenceObject = null;
+
+    [SerializeField] private Transform _poolHolder = null;
     
     public Action OnCreatedPoolObject { get; set; }
     
@@ -13,6 +15,6 @@ public class BallFactory : MonoBehaviour,
     {
         OnCreatedPoolObject?.Invoke();
 
-        return Instantiate(_referenceObject).GetComponent<BallPoolObject>();
+        return Instantiate(_referenceObject, _poolHolder).GetComponent<BallPoolObject>();
     }
 }
