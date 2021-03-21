@@ -25,8 +25,6 @@ public class MovementSimulator : MonoBehaviour
     
     [SerializeField] private BallFactory _factory = null;
 
-    [SerializeField] private CollisionSimulator _collisionSimulator = null;
-    
     [SerializeField] private Transform _targetPhysicTransform = null;
     
     [SerializeField] private Vector3 _initialPosition = Vector3.zero;
@@ -43,14 +41,27 @@ public class MovementSimulator : MonoBehaviour
 
     [SerializeField] private float _mass = 1;
 
-    [Range(1/60f, 2f)][SerializeField] private float _timeStep = 1f;
-
     [SerializeField] private int _showStep = 0;
 
     [SerializeField] private int _consideredCollisions = 1;
     
+    [Range(1/60f, 2f)][SerializeField] private float _timeStep = 1f;
+
+    public float TimeStep => _timeStep;
+    
     private List<MovementData> _movementDatum = new List<MovementData>();
-    public List<MovementData> MovementDatum => _movementDatum;
+
+    private ICollisionSimulator _collisionSimulator;
+    private ICollisionSimulator _CollisionSimulator
+    {
+        get
+        {
+            if (_collisionSimulator == null)
+                _collisionSimulator = GetComponent<ICollisionSimulator>();
+
+            return _collisionSimulator;
+        }
+    }
 
     private Pool<BallActivationInfo, BallPoolObject, BallFactory> _pool;
 
@@ -58,7 +69,7 @@ public class MovementSimulator : MonoBehaviour
 
     private IEnumerator _movementDisplayRoutine;
     
-    private const int _MAX_STEP = 500;
+    private const int _MAX_STEP = 250;
 
     public void StartMovementVisualizeRoutine()
     {
@@ -91,12 +102,14 @@ public class MovementSimulator : MonoBehaviour
         _collisionDatum.Clear();
         
         _movementDatum.AddRange(CalculateMovement(_initialPosition, _initialVelocity));
+        
+        _CollisionSimulator.ResetSim();
 
         int index = 0;
         
         for (int i = 0; i < _consideredCollisions; i++)
         {
-            CollisionData collisionData = _collisionSimulator.DetectCollision(_movementDatum.GetRange(index, _movementDatum.Count - index));
+            CollisionData collisionData = _CollisionSimulator.DetectCollision(_movementDatum.GetRange(index, _movementDatum.Count - index));
             
             if (collisionData != null)
             {
@@ -138,7 +151,7 @@ public class MovementSimulator : MonoBehaviour
             
             MovementData calculatedData = new MovementData(newPosition, newVelocity, acceleration);
 
-            CollisionData data = _collisionSimulator.DetectCollision(calculatedDatum[step], calculatedData);
+            CollisionData data = _CollisionSimulator.DetectCollision(calculatedDatum[step], calculatedData);
 
             calculatedDatum.Add(calculatedData);
             

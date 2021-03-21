@@ -14,7 +14,8 @@ public class CollisionData
     }
 }
 
-public class CollisionSimulator : MonoBehaviour
+public class CollisionSimulator : MonoBehaviour,
+    ICollisionSimulator
 {
     [SerializeField] private Plane _targetPlane = null;
     
@@ -23,6 +24,11 @@ public class CollisionSimulator : MonoBehaviour
     public float BallRadius => _ballRadius;
     
     private Vector3 _collisionPoint = Vector3.zero;
+
+    public void ResetSim()
+    {
+        
+    }
 
     public CollisionData DetectCollision(List<MovementData> movementDatum)
     {
@@ -73,7 +79,7 @@ public class CollisionSimulator : MonoBehaviour
         
         return null;
     }
-
+    
     private Vector3 GetBounceBackSpeed(Vector3 velocity)
     {
         Vector3 bounceBackSpeed =
@@ -89,10 +95,5 @@ public class CollisionSimulator : MonoBehaviour
                                (velocity - Vector3.Dot(velocity, _targetPlane.PlaneNormal) * _targetPlane.PlaneNormal);
 
         return tangentSpeed;
-    }
-
-    private void OnDrawGizmos()
-    {
-        Gizmos.DrawSphere(_collisionPoint, 1f);
     }
 }
